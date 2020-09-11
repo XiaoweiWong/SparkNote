@@ -7,7 +7,7 @@ import org.apache.spark.{SparkConf, SparkContext}
  * @author david
  * @create 2020-09-04 下午 7:48
  */
-object SparkSQL01 {
+object SparkSQL02 {
 
   def main(args: Array[String]): Unit = {
     //TODO 创建环境对象
@@ -19,36 +19,33 @@ object SparkSQL01 {
     //TODO 执行逻辑
 
 
-    val df: DataFrame = spark.read.json("input/user.json")
-    df.createTempView("user")
-    spark.sql("select * from user").show()
-
-    df.select("name","age").show()
-    df.select('name,'age).show()
-        //TODO RDD <=> DF
+        //TODO RDD
     val rdd: RDD[(Int, String, Int)] = spark.sparkContext.makeRDD(List(
       (1, "zhansan", 30),
       (2, "lisi", 35),
       (3, "wangwu", 10),
       (4, "liqi", 20)
     ))
-    val df1: DataFrame =rdd.toDF("id", "name", "age")
-    df1.show()
-    val dfToRDD: RDD[Row] = df1.rdd
-    dfToRDD.foreach(row =>{
-      println(row(0))
-    })
+
+ //   rdd => df => ds 此路不通
+//    val df: DataFrame = rdd.toDF("id","name","age")
+//    val ds: Dataset[Any] = df.map(row => {
+//      val id = row(0)
+//      val name = row(1)
+//      val age = row(2)
+//      row(id, "name:" + name, age)
+//    })
+//    ds.show()
     //TODO RDD < = >  DS
     val mapRDD: RDD[User] = rdd.map(
       t => User(t._1, t._2, t._3)
     )
     val ds1: Dataset[User] = mapRDD.toDS()
-    ds1.show()
-    val dsToRDD: RDD[User] = ds1.rdd
+    val newDS: Dataset[User] = ds1.map(map => {
+      User(map.id, "name:" + map.name, map.age)
+    })
+    newDS.show()
 
-    //TODO datafram <=> dataset
-    val userDS: Dataset[User] = df1.as[User]
-    val userdf: DataFrame = userDS.toDF()
 
     //TODO 关闭连接释放对象
     spark.stop()
