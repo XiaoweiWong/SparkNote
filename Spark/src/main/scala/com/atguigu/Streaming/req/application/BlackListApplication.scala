@@ -1,7 +1,7 @@
 package com.atguigu.Streaming.req.application
 
 import com.atguigu.Streaming.req.controller.BlackListController
-import com.atguigu.Streaming.req.service.BlackListService
+
 import com.atguigu.summer.framework.core.TApplication
 
 /**
